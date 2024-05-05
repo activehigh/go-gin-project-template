@@ -1,0 +1,88 @@
+services:
+  service:
+    image: service
+    platform: linux/arm64
+    build:
+      target: runtime
+      dockerfile: Dockerfile
+      context: .
+      ssh:
+        - default
+      args:
+        - "DOCKER_BUILDKIT=1"
+    env_file:
+      - private.env
+    volumes:
+      - "go-modules:/.go/pkg/mod"
+      - "~/.aws:/.aws"
+    ports:
+      - "8080:8080"
+
+  service-test:
+    image: service-test
+    platform: linux/arm64
+    build:
+      target: builder
+      dockerfile: Dockerfile
+      context: .
+      ssh:
+        - default
+      args:
+        - "DOCKER_BUILDKIT=1"
+    env_file:
+      - private.env
+    volumes:
+      - "go-modules:/.go/pkg/mod"
+      - "~/.aws:/.aws"
+    entrypoint:
+      - go
+      - test
+      - ./...
+      - -covermode=atomic
+      - -coverprofile
+      - cover.out
+      - 2>&1
+      - |
+      - go-junit-report
+      - -set-exit-code
+      - |
+      - tee
+      - report.xml
+
+  dd-agent:
+    image: public.ecr.aws/datadog/agent
+    volumes:
+      - ./test/data/datadog.yaml:/etc/datadog-agent/datadog.yaml
+    ports:
+      - 4317:4317
+      - 4318:4318
+    env_file:
+      - private.env
+
+  # generate mock_utilities and persist them to outside folder structure
+  # prereq: mockgen installed and GOPATH is in environment
+  go-generate:
+    tty: true
+    stdin_open: true
+    build:
+      dockerfile: Dockerfile
+      context: .
+      target: builder
+      ssh:
+        - default
+      args:
+        - "DOCKER_BUILDKIT=1"
+    entrypoint: ""
+    volumes:
+      - "./test/:/app/test/"
+      - "go-modules:/.go/pkg/mod"
+    command:
+      - "sh"
+      - "-c"
+      - "rm -rf /app/test/mocks/ &&
+        go generate -v /app/..."
+
+volumes:
+  # cache go modules here to speed up builds
+  go-modules:
+    driver: local

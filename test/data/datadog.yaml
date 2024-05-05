@@ -1,0 +1,23 @@
+use_dogstatsd: true
+dogstatsd_port: 8125
+bind_host: 0.0.0.0
+
+otlp_config:
+  receiver:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+  metrics:
+    enabled: true
+    resource_attributes_as_tags: true
+    instrumentation_scope_metadata_as_tags: true
+    histograms:
+      mode: distributions
+      send_count_sum_metrics: true
+      send_aggregation_metrics: true
+  traces:
+    enabled: true
+  debug:
+    loglevel: debug

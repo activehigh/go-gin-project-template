@@ -1,0 +1,9 @@
+# Gitversion config file
+mode: Mainline
+branches:
+  # Each commit on the master branch will increment the minor version
+  master:
+    increment: Minor
+ignore:
+  sha: []
+merge-message-formats: {}
