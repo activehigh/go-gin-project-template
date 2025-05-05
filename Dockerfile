@@ -1,4 +1,4 @@
-FROM public.ecr.aws/docker/library/golang:1.22.2 as builder
+FROM public.ecr.aws/docker/library/golang:1.24.0 AS builder
 
 WORKDIR /app
 
@@ -6,11 +6,11 @@ WORKDIR /app
 HEALTHCHECK NONE
 
 # Install test tools
-RUN GOMAXPROCS=1 go install go.uber.org/mock/mockgen@latest &&\
-    GOMAXPROCS=1 go install github.com/onsi/ginkgo/v2/ginkgo@latest && \
-    GOMAXPROCS=1 go install github.com/jstemmer/go-junit-report@latest && \
-    GOMAXPROCS=1 go install github.com/axw/gocov/gocov@latest && \
-    GOMAXPROCS=1 go install github.com/AlekSi/gocov-xml@latest
+RUN go install go.uber.org/mock/mockgen@latest &&\
+    go install github.com/onsi/ginkgo/v2/ginkgo@latest && \
+    go install github.com/jstemmer/go-junit-report@latest && \
+    go install github.com/axw/gocov/gocov@latest && \
+    go install github.com/AlekSi/gocov-xml@latest
 
 
 # Github fingerprint
@@ -18,8 +18,7 @@ RUN GOMAXPROCS=1 go install go.uber.org/mock/mockgen@latest &&\
 ENV GITHUB_RSA_SHA256_FINGERPRINT=uNiVztksCsDhcc0u9e8BujQXVUpKZIDTMczCvj3tD2s\
     GOPRIVATE=github.com
 
-RUN apt-get update && \
-    apt-get install --no-install-recommends openssh-client git -y
+RUN apt-get install --no-install-recommends openssh-client git -y
 
 # add github ssh key fingerprint
 # this is published by github and should be pinned and verified on client side
@@ -42,25 +41,23 @@ COPY configs/ configs/
 COPY internal/ internal/
 
 # Copy test payloads
-COPY test/data/ test/data/
+COPY tests/data/ tests/data/
 
 # generate mocks (run before copying tests as they can change without mocks changing)
 RUN go generate -v ./...
 
 # Build your app binary
-FROM builder as intermediate-builder
+FROM builder as intermittent-builder
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o runtime ./cmd/main.go
 
 # ===========================================================
 
-FROM public.ecr.aws/docker/library/alpine:3.19.1 as runtime
+FROM public.ecr.aws/docker/library/alpine:3.21 AS runtime
 WORKDIR /
 
 RUN apk add --no-cache bash
 
-COPY --from=intermediate-builder /app/runtime ./
+COPY --from=intermittent-builder /app/runtime ./
 USER 65532:65532
-
-EXPOSE 8080
 
 ENTRYPOINT ["/runtime"]
