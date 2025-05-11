@@ -2,11 +2,11 @@ package server
 
 import (
 	"encoding/json"
+	"github.com/activehigh/go-gin-project-template/pkg/v1/configs"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	"github.com/activehigh/go-gin-project-template/configs"
 	healthcheck "github.com/activehigh/go-gin-project-template/internal/handlers/healthcheck"
 	ping "github.com/activehigh/go-gin-project-template/internal/handlers/ping"
 	"github.com/gin-gonic/gin"
@@ -25,8 +25,8 @@ var _ = Describe(
 		It(
 			"/ping will return pong", func() {
 				router := gin.New()
-				router = SetHealthchecks(configs.CliConfig{}, router)
-				router = SetRoutes(configs.CliConfig{}, router)
+				router = SetHealthchecks(&configs.Config{}, router)
+				router = SetRoutes(&configs.Config{}, router)
 
 				w := httptest.NewRecorder()
 				req, _ := http.NewRequest("GET", "/ping", nil)
@@ -44,8 +44,8 @@ var _ = Describe(
 		It(
 			"/live will return I am alive", func() {
 				router := gin.New()
-				router = SetHealthchecks(configs.CliConfig{}, router)
-				router = SetRoutes(configs.CliConfig{}, router)
+				router = SetHealthchecks(&configs.Config{}, router)
+				router = SetRoutes(&configs.Config{}, router)
 
 				w := httptest.NewRecorder()
 				req, _ := http.NewRequest("GET", "/live", nil)
@@ -63,8 +63,8 @@ var _ = Describe(
 		It(
 			"/ready will return I am alive", func() {
 				router := gin.New()
-				router = SetHealthchecks(configs.CliConfig{}, router)
-				router = SetRoutes(configs.CliConfig{}, router)
+				router = SetHealthchecks(&configs.Config{}, router)
+				router = SetRoutes(&configs.Config{}, router)
 
 				w := httptest.NewRecorder()
 				req, _ := http.NewRequest("GET", "/ready", nil)

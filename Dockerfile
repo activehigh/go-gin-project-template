@@ -33,11 +33,11 @@ RUN mkdir -p /root/.ssh &&\
 
 # Copy the package management manifest
 COPY go.mod go.sum ./
-RUN --mount=type=ssh\
-    git config --global url."ssh://git@github.com".insteadOf "https://github.com" && go mod download
+RUN go mod download
 
 COPY cmd/ cmd/
 COPY configs/ configs/
+COPY pkg/ pkg/
 COPY internal/ internal/
 
 # Copy test payloads

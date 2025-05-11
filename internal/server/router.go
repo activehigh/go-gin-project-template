@@ -2,12 +2,13 @@ package server
 
 import (
 	"fmt"
-	"go.uber.org/zap"
 	"net/http"
 	"strings"
 
-	"github.com/activehigh/go-gin-project-template/configs"
-	handlers "github.com/activehigh/go-gin-project-template/internal/handlers"
+	"go.uber.org/zap"
+
+	"github.com/activehigh/go-gin-project-template/internal/handlers"
+	"github.com/activehigh/go-gin-project-template/pkg/v1/configs"
 	"github.com/gin-gonic/gin"
 
 	"github.com/activehigh/go-gin-project-template/internal/handlers/healthcheck"
@@ -49,10 +50,9 @@ func BindHandler[TReq handlers.Request, TRes handlers.Response](handler handlers
 		}
 	}
 	return handlerWrapperFunc
-
 }
 
-func SetHealthchecks(config configs.CliConfig, router *gin.Engine) *gin.Engine {
+func SetHealthchecks(config *configs.Config, router *gin.Engine) *gin.Engine {
 	// readiness & liveness probes
 	router.GET(
 		"/ready",
@@ -70,7 +70,7 @@ func SetHealthchecks(config configs.CliConfig, router *gin.Engine) *gin.Engine {
 	return router
 }
 
-func SetRoutes(c configs.CliConfig, router *gin.Engine) *gin.Engine {
+func SetRoutes(c *configs.Config, router *gin.Engine) *gin.Engine {
 	// ping
 	router.GET("/ping", BindHandler[ping.PingRequest, ping.PongResponse](ping.PingHandler{}))
 	router.POST("/ping", BindHandler[ping.PingRequest, ping.PongResponse](ping.PingHandler{}))
