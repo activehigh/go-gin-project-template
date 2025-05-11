@@ -10,10 +10,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Build Docker image
-        run: docker build -t go-gin-project-template .
+
+      - uses: extractions/setup-just@v3
+
+      - name: Set up Docker Compose
+        uses: docker/setup-compose-action@v1
+        with:
+          version: latest
 
       - name: Run tests in Docker
-        run: docker run go-gin-project-template go test ./...
-        env:
-          DEBUG: "true"
+        run: just test
