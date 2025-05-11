@@ -37,6 +37,7 @@ RUN go mod download
 
 COPY cmd/ cmd/
 COPY configs/ configs/
+COPY pkg/ pkg/
 COPY internal/ internal/
 
 # Copy test payloads
