@@ -6,8 +6,6 @@ services:
       target: runtime
       dockerfile: Dockerfile
       context: .
-      ssh:
-        - default
       args:
         - "DOCKER_BUILDKIT=1"
     env_file:
@@ -25,8 +23,6 @@ services:
       target: builder
       dockerfile: Dockerfile
       context: .
-      ssh:
-        - default
       args:
         - "DOCKER_BUILDKIT=1"
     env_file:
