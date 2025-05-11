@@ -2,6 +2,7 @@ name: Build and Test
 
 on:
   push:
+    branches: [ main ]
   pull_request:
     branches: [ main ]
 
@@ -10,13 +11,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-
-      - uses: extractions/setup-just@v3
-
-      - name: Set up Docker Compose
-        uses: docker/setup-compose-action@v1
-        with:
-          version: latest
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
       - name: Run tests in Docker
-        run: just test
+        run: go test ./...
+        env:
+          DEBUG: "true"
+          
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          target: builder
+          load: true
+          tags: go-gin-project-template:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
